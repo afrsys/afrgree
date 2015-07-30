@@ -1,0 +1,26 @@
+{
+  "name": "afrgree",
+  "version": "1.0.0",
+  "description": "System to survey opinion of tax auditors about their carreers.",
+  "main": "main/api/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://aronrodrigues@github.com/afrsys/afrgree.git"
+  },
+  "keywords": [
+    "afr",
+    "appgree"
+  ],
+  "author": "aronrodrigues@gmail.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/afrsys/afrgree/issues"
+  },
+  "homepage": "https://github.com/afrsys/afrgree",
+  "devDependencies": {
+    "express": "^4.13.1"
+  }
+}
