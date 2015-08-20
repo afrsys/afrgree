@@ -8,6 +8,7 @@
   function SurveyListCtrl(surveyListPromise) {
     
     var ctrl = this;
+    
     ctrl.list = surveyListPromise.data;
 
   }

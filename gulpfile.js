@@ -195,6 +195,10 @@
     del(['./target/build'], cb);
   });
 
+  gulp.task('loadData', function () {
+    require('./test/data/loadData');
+  });
+
   gulp.task('default', ['build']);
 
 })();

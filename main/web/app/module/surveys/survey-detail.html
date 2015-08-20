@@ -31,17 +31,17 @@
 </tabset-->
 <div class="list-group margin-top-10">
   <div class="list-group-item" ng-repeat="post in surveyDetailCtrl.survey.posts">
-    <strong>@{{ post.user }}</strong> {{ post.content }}
+    <strong>{{ post.user.name }}</strong> {{ post.message }}
   </div>
   <div class="list-group-item" ng-show="surveyDetailCtrl.isActive">
     <div class="row">
       <div class="col-md-12">
-        <textarea class="form-control"></textarea>
+        <textarea class="form-control" ng-model="surveyDetailCtrl.message"></textarea>
       </div>
     </div>
     <div class="row margin-top-10">
       <div class="col-sm-12 col-md-4 col-md-offset-8">
-        <button class="btn btn-block btn-primary">Postar</button>
+        <button class="btn btn-block btn-primary" ng-click="surveyDetailCtrl.post()">Postar</button>
       </div>
     </div>
   </div>

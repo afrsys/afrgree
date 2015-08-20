@@ -18,6 +18,10 @@
       return $http.get('/api/surveys/' + id);
     };
 
+    srvc.post = function (id, message) {
+      return $http.post('/api/surveys/' + id + '/post', { message: message });
+    };
+
     return srvc;
 
   }

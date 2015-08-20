@@ -6,7 +6,6 @@
   var config = require('../../config');
   var router = require('express').Router();
 
-  router.get('/:id', detail);
   router.get('/', list);
   exports.router = router;
 
@@ -18,6 +17,7 @@
     .sort({ closeDate: -1 })
     .skip(parseInt(i))
     .limit(config.pageSize)
+    .populate('posts.user.name')
     .exec()
     .then(function (data) {
       if (data && data.length > 0) {
@@ -25,56 +25,60 @@
       } else {
         return res.status(204).jsonp([]);
       }
-    }, function (err) {
-      return next(err);
-    });
+    }, next);
 
   }
 
-  function detail (req, res, next) {
-
-    var id = req.params.id;
-
-    Survey.findOne({ _id: id })
-    .exec()
-    .then(function (data) {
-      if (data) {
-        return res.jsonp(data);
-      } else {
-        return next(errorCode(new Error('notFound'), 404));
-      }
-    }, function (err) {
-      return next(err);
-    });
-
-  }
-
-  router.post('/:id', function (req, res, next) {
-
-    var post = {
-      message: req.body.message,
-      user: req.user._id,
-      date: Date.now()
-    };
+  router.get('/:id', function (req, res, next) {
 
     Survey.findOne({ _id: req.params.id })
     .exec()
     .then(function (survey) {
       if (survey) {
-        survey.posts.push(post);
-        survey.save(function (err) {
-          if (!err) {
-            res.status(201).jsonp(post);
-          } else {
-            next(err);
-          }
-        });
+        return res.jsonp(survey);
       } else {
         return next(errorCode(new Error('notFound'), 404));
       }
-    }, function (err) {
-      return next(err);
-    });
+    }, next);
+
+  });
+
+  router.post('/:id/post', function (req, res, next) {
+
+    if (req.body.message) {
+
+      var post = {
+        message: req.body.message,
+        user: { _id: req.user._id, name: req.user.name },
+        date: Date.now()
+      };
+
+      Survey.findOne({ _id: req.params.id })
+      .exec()
+      .then(function (survey) {
+
+        if (survey) {
+
+          survey.posts.push(post);
+          survey.save(function (err) {
+
+            if (!err) {
+              res.status(201).jsonp(post);
+            } else {
+              next(err);
+            }
+
+          });
+
+        } else {
+          return next(errorCode(new Error('notFound'), 404));
+        }
+
+      }, next);
+
+    } else {
+      return next(errorCode(new ReferenceError(), 400));
+    }
 
   });
 

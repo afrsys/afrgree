@@ -20,7 +20,7 @@
 
   var config = require('../../config');
   
-  describe('survey.controller', function () {
+  describe.skip('survey.controller', function () {
 
     var sandbox, app, logger, query;
 
@@ -32,10 +32,14 @@
     }
 
     function addUser(user) {
+
       return function (req, res, next) {
+
         req.user = user;
         next();
-      }
+        
+      };
+
     }
 
     function errorHandler(err, req, res, next) {
@@ -145,8 +149,10 @@
     describe('detail', function () {
 
       beforeEach(function () {
+
         sandbox.spy(Survey, 'findOne');
         app.use(addLogger, surveyController.router, errorHandler);
+
       });
 
       it ('returns 200 with data', function (done) {
@@ -203,32 +209,100 @@
     });
 
     describe('post', function () {
+
       beforeEach(function () {
+
         sandbox.spy(Survey, 'findOne');
         app.use(addLogger, addUser(new User(userData[0])), surveyController.router, errorHandler);
+
       });
 
       it ('returns 201 with the new post', function (done) {
 
+        var message = Math.random() + ' ' + Date.now();
+        var added = false;
+
         sandbox.stub(Survey.prototype, 'save', function (callback) {
+
+          added = this.posts.filter(function (post) {
+            return message === post.message;
+          }).length > 0;
           callback(null, new Survey(surveyData[0]));
+
         });
+
         sandbox.stub(query, 'exec').returns(q.resolve(new Survey(surveyData[0])));
-        
 
         request(app)
-        .post('/eeeeeeef0000000f00001111')
-        .send({ message: 'Bla bla bla' })
+        .post('/eeeeeeef0000000f00001111/post')
+        .send({ message: message })
         .expect(201)
         .expect(function (response) {
 
           expect(Survey.findOne.getCall(0).args[0]._id).to.be.equals('eeeeeeef0000000f00001111');
-          expect(response.body.message).to.be.deep.equals('Bla bla bla');
+          expect(response.body.message).to.be.deep.equals(message);
+          expect(added).to.be.true;
+          expect(Survey.prototype.save.called).to.be.true;
 
         })
         .end(done);
 
       });
+
+      it ('returns 404 when the id is invalid', function (done) {
+
+        sandbox.spy(Survey.prototype, 'save');
+        sandbox.stub(query, 'exec').returns(q.resolve(null));
+
+        request(app)
+        .post('/eeeeeeef0000000feeeeeeee/post')
+        .send({ message: 'Bla bla bla' })
+        .expect(404)
+        .expect(function (response) {
+
+          expect(Survey.findOne.getCall(0).args[0]._id).to.be.equals('eeeeeeef0000000feeeeeeee');
+          expect(Survey.prototype.save.called).to.be.false;
+
+        })
+        .end(done);
+
+      });
+
+      it ('returns 500 when find throws an error', function (done) {
+
+        sandbox.stub(Survey.prototype, 'save').yields(new Error('mongoSaveError'));
+        sandbox.stub(query, 'exec').returns(q.resolve(new Survey(surveyData[0])));
+
+        request(app)
+        .post('/eeeeeeef0000000feeeeeeee/post')
+        .send({ message: 'Bla bla bla' })
+        .expect(500, { message: 'mongoSaveError' })
+        .end(done);
+
+      });
+
+      it ('returns 500 when find throws an error', function (done) {
+
+        sandbox.spy(Survey.prototype, 'save');
+        sandbox.stub(query, 'exec').returns(q.reject(new Error('mongoFindError')));
+
+        request(app)
+        .post('/eeeeeeef0000000feeeeeeee/post')
+        .send({ message: 'Bla bla bla' })
+        .expect(500, { message: 'mongoFindError' })
+        .end(done);
+
+      });
+
+      it ('returns 400 when no message is passed', function (done) {
+
+        request(app)
+        .post('/eeeeeeef0000000feeeeeeee/post')
+        .expect(400)
+        .end(done);
+
+      });
+
     });
 
   });
