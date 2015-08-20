@@ -1,0 +1,26 @@
+<h1>Nova Pesquisa</h1>
+
+<div class="list-group margin-top-10">
+  <a ng-href="#/surveys/detail/{{survey.status}}" class="list-group-item" ng-class="{'disabled': survey.status === 'closed'}" ng-repeat="survey in surveyListCtrl.list">
+  {{survey.title}}</a>
+</div>
+<div class="row">
+  <div class="col-sm-12">
+  	<div class="form-group">
+      <label for="surveyTitle">Título</label>
+      <input id="surveyTitle" type="text" class="form-control input-lg" required autofocus ng-model="surveyCreateCtrl.title" >
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-sm-12">
+  	<div class="form-group">
+      <label for="surveyDescription">Descrição</label>
+      <textarea id="surveyDescription" type="text" class="form-control input-lg" required autofocus ng-model="surveyCreateCtrl.description" />
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-sm-12 col-md-push-3 col-md-3 col-md-offset-6"><a ng-click="surveyCreateCtrl.create()" class="btn btn-block btn-primary">Novo</a></div>
+  <div class="col-sm-12 col-md-pull-3 col-md-3"><a ui-sref="surveys.list" class="btn btn-block btn-default">Voltar</a></div>
+</div>

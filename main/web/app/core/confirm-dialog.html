@@ -1,0 +1,10 @@
+<div class="modal-header">
+  <h3 class="modal-title">{{dialogCtrl.data.title}}</h3>
+</div>
+<div class="modal-body">
+  <p ng-bind-html="dialogCtrl.data.message"></p>
+</div>
+<div class="modal-footer">
+  <button class="btn btn-primary" ng-click="dialogCtrl.ok()">OK</button>
+  <button class="btn btn-warning" ng-click="dialogCtrl.cancel()">Cancel</button>
+</div>

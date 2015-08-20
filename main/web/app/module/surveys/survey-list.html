@@ -1,0 +1,8 @@
+<h1>Pesquisas</h1>
+<div class="row">
+  <div class="col-sm-12 col-md-3 col-md-offset-9"><a class="btn btn-block btn-primary" ui-sref="surveys.create">Novo</a></div>
+</div>
+<div class="list-group margin-top-10">
+  <a ng-href="#/surveys/{{survey._id}}" class="list-group-item" ng-class="{'disabled': survey.status === 'closed'}" ng-repeat="survey in surveyListCtrl.list">
+  {{survey.title}}</a>
+</div>

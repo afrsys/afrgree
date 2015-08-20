@@ -1,0 +1,53 @@
+<h1>{{surveyDetailCtrl.survey.title}}</h1>
+<div class="row">
+  <div class="col-sm-12 col-md-6"><label>Data de criação:</label> {{surveyDetailCtrl.survey.createDate | date: 'dd/MM/yyyy hh:mm:ss'}}</div>
+  <div class="col-sm-12 col-md-6"><label>Data de encerramento:</label> {{surveyDetailCtrl.survey.closeDate | date: 'dd/MM/yyyy hh:mm:ss'}}</div>
+</div>
+<div class="row">
+  <div class="col-sm-12 longtext">{{surveyDetailCtrl.survey.description}}</div>
+</div>
+
+<div class="row margin-top-10" ng-show="surveyDetailCtrl.isActive">
+  <div class="col-sm-12 col-md-6">
+    <button class="btn btn-block btn-success">Sim</button>
+  </div>
+  <div class="col-sm-12 col-md-6">
+    <button class="btn btn-block btn-danger">Não</button>
+  </div>
+</div>
+<!--tabset class="margin-top-10" ng-show="!surveyDetailCtrl.isActive && surveyDetailCtrl.result">
+  <tab heading="Total">
+    <p><strong>Sim: </strong>{{ surveyDetailCtrl.result.total }}<br />
+      <strong>Não: </strong>{{ 1 - surveyDetailCtrl.result.total }}</p>
+  </tab>
+  <tab heading="Ativos">
+    <p><strong>Sim: </strong>{{ surveyDetailCtrl.survey.result.active }}<br />
+      <strong>Não: </strong>{{ 1 - surveyDetailCtrl.result.active }}</p>
+  </tab>
+  <tab heading="Aposentados">
+    <p><strong>Sim: </strong>{{ surveyDetailCtrl.result.retired }}<br />
+      <strong>Não: </strong>{{ 1 - surveyDetailCtrl.result.retired }}</p>
+  </tab>
+</tabset-->
+<div class="list-group margin-top-10">
+  <div class="list-group-item" ng-repeat="post in surveyDetailCtrl.survey.posts">
+    <strong>@{{ post.user }}</strong> {{ post.content }}
+  </div>
+  <div class="list-group-item" ng-show="surveyDetailCtrl.isActive">
+    <div class="row">
+      <div class="col-md-12">
+        <textarea class="form-control"></textarea>
+      </div>
+    </div>
+    <div class="row margin-top-10">
+      <div class="col-sm-12 col-md-4 col-md-offset-8">
+        <button class="btn btn-block btn-primary">Postar</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row margin-top-10">
+  <div class="col-sm-12 col-md-4 col-md-offset-8">
+    <a ui-sref="surveys.list" class="btn btn-block btn-default">Voltar</a>
+  </div>
+</div>
