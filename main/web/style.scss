@@ -45,3 +45,24 @@ body {
 .alert-panel .alert {
   margin: 0 40px 10px;
 }
+
+.list-group-item.ng-move,
+.list-group-item.ng-enter,
+.list-group-item.ng-leave {
+  -webkit-transition:all linear 0.5s;
+  transition:all linear 0.5s;
+}
+
+.list-group-item.ng-leave.ng-leave-active,
+.list-group-item.ng-move,
+.list-group-item.ng-enter {
+  opacity:0;
+  background: #CCC;
+}
+
+.list-group-item.ng-leave,
+.list-group-item.ng-move.ng-move-active,
+.list-group-item.ng-enter.ng-enter-active {
+  opacity:1;
+  background: #FFF;
+}

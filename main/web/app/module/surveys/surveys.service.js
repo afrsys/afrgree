@@ -19,7 +19,15 @@
     };
 
     srvc.post = function (id, message) {
-      return $http.post('/api/surveys/' + id + '/post', { message: message });
+      return $http.post('/api/surveys/' + id + '/posts', { message: message });
+    };
+
+    srvc.getPosts = function (id, index) {
+      return $http.get('/api/surveys/' + id + '/posts?i=' + index);
+    };
+
+    srvc.getNewestPosts = function (id, time) {
+      return $http.get('/api/surveys/' + id + '/posts/newest/?t=' + time);
     };
 
     return srvc;

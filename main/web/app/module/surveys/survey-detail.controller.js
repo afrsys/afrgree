@@ -8,11 +8,10 @@
   function SurveyDetailCtrl($stateParams, _, alertService, surveyPromise, surveysService) {
 
     var ctrl = this;
+        
     
-    ctrl.survey = surveyPromise.data;
-    ctrl.message = null;
-    ctrl.isActive = new Date(ctrl.survey.closeDate).getTime() > Date.now();
-    if (ctrl.isActive) {
+    
+    /*if (ctrl.isActive) {
       ctrl.result = countVotes(ctrl.survey.votes);
     }
     console.log(ctrl.survey);
@@ -57,7 +56,7 @@
       
       return result;
       
-    }
+    }*/
 
     ctrl.post = function () {
 
@@ -65,7 +64,9 @@
       .then(function (res) {
 
         ctrl.message = null;
-        ctrl.survey.posts.push(res.data);
+        //ctrl.survey.posts.push(res.data);
+        ctrl.loadPosts();
+
 
       })
       .catch(function (res) {
@@ -85,6 +86,35 @@
       });
       
     };
+
+    ctrl.loadPosts = function () {
+      console.log(ctrl.survey._id, ctrl.survey.posts.length)
+      surveysService.getPosts(ctrl.survey._id, ctrl.survey.posts.length)
+      .then(function (res) {
+        console.log(res.status)
+        if (res.status !== 204) {
+          Array.prototype.unshift.apply(ctrl.survey.posts, res.data);
+          ctrl.hasMore = ctrl.survey.posts.length >= 20;
+        } else {
+          ctrl.hasMore = false;
+        }
+      }).catch(function (data) {
+        alertService.error('Não foi possível carregar as postagens');
+      })
+    }
+
+    function initialize() {
+
+      ctrl.survey = surveyPromise.data;
+      ctrl.survey.posts = [];
+      ctrl.message = null;
+      ctrl.isActive = new Date(ctrl.survey.closeDate).getTime() > Date.now();
+      ctrl.loadPosts();
+      
+    }
+
+    initialize();
+
 
   }
 

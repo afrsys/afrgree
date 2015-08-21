@@ -6,14 +6,13 @@
   var config = require('../../config');
   var router = require('express').Router();
 
-  router.get('/', list);
   exports.router = router;
 
-  function list (req, res, next) {
+  router.get('/', function (req, res, next) {
     
     var i = req.query.i || 0;
 
-    Survey.find()
+    Survey.find({}, { title: 1, closeDate: 1 })
     .sort({ closeDate: -1 })
     .skip(parseInt(i))
     .limit(config.pageSize)
@@ -26,11 +25,11 @@
       }
     }, next);
 
-  }
+  });
 
   router.get('/:id', function (req, res, next) {
 
-    Survey.findOne({ _id: req.params.id })
+    Survey.findOne({ _id: req.params.id }, { votes: 0, posts: 0 })
     .populate('posts.user', 'name')
     .exec()
     .then(function (survey) {
@@ -43,7 +42,7 @@
 
   });
 
-  router.post('/:id/post', function (req, res, next) {
+  router.post('/:id/posts', function (req, res, next) {
 
     if (req.body.message) {
 
@@ -61,7 +60,7 @@
 
           if (survey.isActive) {
 
-            survey.posts.push(post);
+            survey.posts.unshift(post);
             survey.save(function (err) {
 
               if (!err) {
@@ -86,6 +85,32 @@
     } else {
       return next(errorCode(new ReferenceError(), 400));
     }
+
+  });
+
+  router.get('/:id/posts', function (req, res, next) {
+
+    var i = req.query.i || 0;
+
+    console.log({reqI: req.query.i, i: i});
+
+    Survey.findOne({ _id: req.params.id }, { posts: { $slice: [ i, config.pageSize ] } })
+    .populate('posts.user', 'name')
+    .exec()
+    .then(function (survey) {
+
+      if (survey) {
+
+        if (survey.posts && survey.posts.length > 0) {
+          return res.jsonp(survey.posts);
+        } else {
+          return res.status(204).send();
+        }
+
+      } else {
+        return next(errorCode(new Error('notFound'), 404));
+      }
+    }, next);
 
   });
 

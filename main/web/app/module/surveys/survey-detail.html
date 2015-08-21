@@ -30,8 +30,11 @@
   </tab>
 </tabset-->
 <div class="list-group margin-top-10">
-  <div class="list-group-item" ng-repeat="post in surveyDetailCtrl.survey.posts">
-    <strong>{{ post.user.name }}</strong> {{ post.message }}
+  <div class="list-group-item" ng-show="surveyDetailCtrl.hasMore">
+    <a ng-click="surveyDetailCtrl.loadPosts()">Carregar comentários anteriores</a>
+  </div>
+  <div class="list-group-item" ng-repeat="post in surveyDetailCtrl.survey.posts | orderBy:'date'">
+    <strong>{{ post.user.name }}</strong> {{ post.message }} {{post.date}}
   </div>
   <div class="list-group-item" ng-show="surveyDetailCtrl.isActive">
     <div class="row">
