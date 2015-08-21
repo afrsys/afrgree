@@ -21,6 +21,14 @@
 
   });
 
+  Schema.virtual('isActive')
+  .get(function () {
+    return this.closeDate.getTime() > Date.now();
+  });
+  //TODO addPost
+  //TODO vote
+  //TODO result
+
   module.exports = mongoose.model('surveys', Schema);
 
 })();

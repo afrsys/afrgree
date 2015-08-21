@@ -2,7 +2,7 @@ module.exports = [{
   _id: 'eeeeeeef0000000f00000000',
   title: 'Declaramos estado de greve?',
   createDate: Date.now(),
-  closeDate: Date.now() + 30000,
+  closeDate: Date.now() + (24 * 3600 * 1000),
   description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod ' +
     'tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis ' +
     'nostrud exercitation ullamco laboris \n\n nisi ut aliquip ex ea commodo ' +

@@ -17,7 +17,6 @@
     .sort({ closeDate: -1 })
     .skip(parseInt(i))
     .limit(config.pageSize)
-    .populate('posts.user.name')
     .exec()
     .then(function (data) {
       if (data && data.length > 0) {
@@ -32,6 +31,7 @@
   router.get('/:id', function (req, res, next) {
 
     Survey.findOne({ _id: req.params.id })
+    .populate('posts.user', 'name')
     .exec()
     .then(function (survey) {
       if (survey) {
@@ -59,18 +59,25 @@
 
         if (survey) {
 
-          survey.posts.push(post);
-          survey.save(function (err) {
+          if (survey.isActive) {
 
-            if (!err) {
-              res.status(201).jsonp(post);
-            } else {
-              next(err);
-            }
+            survey.posts.push(post);
+            survey.save(function (err) {
 
-          });
+              if (!err) {
+                res.status(201).jsonp(post);
+              } else {
+                next(err);
+              }
+
+            });
+
+          } else {
+            return next(errorCode(new ReferenceError(), 400));
+          }
 
         } else {
+
           return next(errorCode(new Error('notFound'), 404));
         }
 

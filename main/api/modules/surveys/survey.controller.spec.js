@@ -20,7 +20,7 @@
 
   var config = require('../../config');
   
-  describe.skip('survey.controller', function () {
+  describe.only('survey.controller', function () {
 
     var sandbox, app, logger, query;
 
@@ -299,6 +299,28 @@
         request(app)
         .post('/eeeeeeef0000000feeeeeeee/post')
         .expect(400)
+        .end(done);
+
+      });
+
+      it ('returns 400 when the survey is not active', function (done) {
+
+        var message = Math.random() + ' ' + Date.now();
+        var expiredSurvey = new Survey(surveyData[1]);
+
+        expiredSurvey.openDate = Date.now() - 3 * 24 * 3600 * 1000;
+        expiredSurvey.closeDate = Date.now() - 1 * 24 * 3600 * 1000;
+
+        sandbox.spy(Survey.prototype, 'save');
+        sandbox.stub(query, 'exec').returns(q.resolve(expiredSurvey));
+
+        request(app)
+        .post('/eeeeeeef0000000f00002222/post')
+        .send({ message: message })
+        .expect(400)
+        .expect(function (response) {
+          expect(Survey.prototype.save.called).to.be.false;
+        })
         .end(done);
 
       });

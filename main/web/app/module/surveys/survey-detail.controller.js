@@ -11,7 +11,7 @@
     
     ctrl.survey = surveyPromise.data;
     ctrl.message = null;
-    ctrl.isActive = new Date(ctrl.survey.closeDate).getTime() === Date.now();
+    ctrl.isActive = new Date(ctrl.survey.closeDate).getTime() > Date.now();
     if (ctrl.isActive) {
       ctrl.result = countVotes(ctrl.survey.votes);
     }
