@@ -27,7 +27,7 @@
     };
 
     srvc.getNewestPosts = function (id, time) {
-      return $http.get('/api/surveys/' + id + '/posts/newest/?t=' + time);
+      return $http.get('/api/surveys/' + id + '/posts/' + time);
     };
 
     return srvc;

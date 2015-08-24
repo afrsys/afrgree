@@ -90,11 +90,9 @@
 
   router.get('/:id/posts', function (req, res, next) {
 
-    var i = req.query.i || 0;
-
-    console.log({reqI: req.query.i, i: i});
-
-    Survey.findOne({ _id: req.params.id }, { posts: { $slice: [ i, config.pageSize ] } })
+    Survey.findOne({ _id: req.params.id }, {
+      votes: 0, description: 0, closeDate: 0, createDate: 0, title:0,
+      posts: { $slice: [parseInt(req.query.i || 0), config.pageSize] } })
     .populate('posts.user', 'name')
     .exec()
     .then(function (survey) {
@@ -102,7 +100,36 @@
       if (survey) {
 
         if (survey.posts && survey.posts.length > 0) {
-          return res.jsonp(survey.posts);
+          return res.jsonp(survey.posts.reverse());
+        } else {
+          return res.status(204).send();
+        }
+
+      } else {
+        return next(errorCode(new Error('notFound'), 404));
+      }
+    }, next);
+
+  });
+
+  router.get('/:id/posts/:time(\\d+)', function (req, res, next) {
+
+    Survey.findOne({ _id: req.params.id }, {
+      votes: 0, description: 0, closeDate: 0, createDate: 0, title:0,
+      posts: { $slice: [0, 100] } })
+    .populate('posts.user', 'name')
+    .exec()
+    .then(function (survey) {
+      if (survey) {
+        if (survey.posts && survey.posts.length > 0) {
+
+          var time = parseInt(req.params.time);
+          var result = survey.posts.filter(function (post) {
+            return post.date.getTime() > time;
+          }).reverse();
+          
+          return res.jsonp(result);
+
         } else {
           return res.status(204).send();
         }

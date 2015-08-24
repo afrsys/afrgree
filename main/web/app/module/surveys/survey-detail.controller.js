@@ -8,8 +8,6 @@
   function SurveyDetailCtrl($stateParams, _, alertService, surveyPromise, surveysService) {
 
     var ctrl = this;
-        
-    
     
     /*if (ctrl.isActive) {
       ctrl.result = countVotes(ctrl.survey.votes);
@@ -61,47 +59,62 @@
     ctrl.post = function () {
 
       surveysService.post(ctrl.survey._id, ctrl.message)
-      .then(function (res) {
+      .then(function (postResponse) {
 
         ctrl.message = null;
-        //ctrl.survey.posts.push(res.data);
-        ctrl.loadPosts();
+        var lastPost = _.max(ctrl.survey.posts, function (post) {
+          return new Date(post.date).getTime();
+        });
 
+        surveysService.getNewestPosts(ctrl.survey._id, new Date(lastPost.date).getTime())
+        .then(function (getResponse) {
 
-      })
-      .catch(function (res) {
+          console.log(getResponse);
+          Array.prototype.unshift.apply(ctrl.survey.posts, getResponse.data);
+          ctrl.lastNewestLoad = Date.now();
+
+        }).catch(function (getError) {
+
+          console.log(getError);
+          ctrl.survey.posts.push(postResponse.data);
+          alertService.error('Não foi possível carregar as novas postagens.');
         
-        var message = null;
-        
-        switch (res.status){
-          case 400:
-            message = 'Usuário ou senha incorretos.';
-            break;
-          default:
-            message = 'Não foi possível efetuar autenticação no servidor.';
-            break;
-        }
-        alertService.error(message);
+        });
 
+      }).catch(function (postError) {
+
+        console.log(postError);
+        alertService.error('Não foi possível efetuar a postagens.');
+      
       });
       
     };
 
     ctrl.loadPosts = function () {
-      console.log(ctrl.survey._id, ctrl.survey.posts.length)
+      
       surveysService.getPosts(ctrl.survey._id, ctrl.survey.posts.length)
       .then(function (res) {
-        console.log(res.status)
-        if (res.status !== 204) {
-          Array.prototype.unshift.apply(ctrl.survey.posts, res.data);
-          ctrl.hasMore = ctrl.survey.posts.length >= 20;
-        } else {
-          ctrl.hasMore = false;
+        
+        switch (res.status) {
+          case 200:
+            Array.prototype.unshift.apply(ctrl.survey.posts, res.data);
+            ctrl.hasMore = res.data.length >= 20;
+            break;
+          case 204:
+            ctrl.hasMore = false;
+            break;
+          default:
+            console.log('unknownStatus', res.status);
         }
-      }).catch(function (data) {
-        alertService.error('Não foi possível carregar as postagens');
-      })
-    }
+
+      }).catch(function (error) {
+
+        console.log(error);
+        alertService.error('Não foi possível carregar as postagens.');
+      
+      });
+
+    };
 
     function initialize() {
 
@@ -114,7 +127,6 @@
     }
 
     initialize();
-
 
   }
 

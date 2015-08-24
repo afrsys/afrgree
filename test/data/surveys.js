@@ -25,7 +25,7 @@ module.exports = [{
     { user: 'aaaaaaaf0000000f00001111', date: Date.now() - 7000, message: '7000 bla bla bla bla' },
     { user: 'aaaaaaaf0000000f00001111', date: Date.now() - 8000, message: '8000 bla bla bla bla' },
     { user: 'aaaaaaaf0000000f00001111', date: Date.now() - 9000, message: '9000 bla bla bla bla' },
-    { user: 'aaaaaaaf0000000f00001111', date: Date.now() - 10000, message: '10000 bla bla bla bla' },
+    { user: 'aaaaaaaf0000000f00001111', date: Date.now() - 10000, message: '10000 bla bla bla bla' }
   ]
 }, {
   _id: 'eeeeeeef0000000f00001111',

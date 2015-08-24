@@ -1,10 +1,10 @@
 <h1>{{surveyDetailCtrl.survey.title}}</h1>
 <div class="row">
-  <div class="col-sm-12 col-md-6"><label>Data de criação:</label> {{surveyDetailCtrl.survey.createDate | date: 'dd/MM/yyyy hh:mm:ss'}}</div>
-  <div class="col-sm-12 col-md-6"><label>Data de encerramento:</label> {{surveyDetailCtrl.survey.closeDate | date: 'dd/MM/yyyy hh:mm:ss'}}</div>
+  <div class="col-sm-12 col-md-6"><label>Data de criação:</label> {{surveyDetailCtrl.survey.createDate }}</div>
+  <div class="col-sm-12 col-md-6"><label>Data de encerramento:</label> {{surveyDetailCtrl.survey.closeDate }}</div>
 </div>
 <div class="row">
-  <div class="col-sm-12 longtext">{{surveyDetailCtrl.survey.description}}</div>
+  <div class="col-sm-12 longtext">{{ surveyDetailCtrl.survey.description }}</div>
 </div>
 
 <div class="row margin-top-10" ng-show="surveyDetailCtrl.isActive">

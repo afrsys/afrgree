@@ -20,7 +20,7 @@
 
   var config = require('../../config');
   
-  describe.skip('survey.controller', function () {
+  describe('survey.controller', function () {
 
     var sandbox, app, logger, query;
 
@@ -355,7 +355,7 @@
           .expect(function (response) {
 
             expect(Survey.findOne.getCall(0).args[0]._id).to.be.equals('eeeeeeef0000000f00001111');
-            expect(Survey.findOne.getCall(0).args[1].posts.$slice[0]).to.be.equals(-config.pageSize);
+            expect(Survey.findOne.getCall(0).args[1].posts.$slice[0]).to.be.equals(0);
             expect(Survey.findOne.getCall(0).args[1].posts.$slice[1]).to.be.equals(config.pageSize);
             //expect(response.body).to.be.deep.equals(survey.posts);
 
@@ -366,7 +366,7 @@
 
       it ('returns 200 with data with data from i', function (done) {
 
-        survey.posts = [ { _id: 'aaaaaaaf0000000f00001111' } ]
+        survey.posts = [{ _id: 'aaaaaaaf0000000f00001111' }];
         sandbox.stub(query, 'exec').returns(q.resolve(survey));
 
         request(app)
@@ -375,7 +375,7 @@
           .expect(function (response) {
 
             expect(Survey.findOne.getCall(0).args[0]._id).to.be.equals('eeeeeeef0000000f00001111');
-            expect(Survey.findOne.getCall(0).args[1].posts.$slice[0]).to.be.equals(-20);
+            expect(Survey.findOne.getCall(0).args[1].posts.$slice[0]).to.be.equals(20);
             expect(Survey.findOne.getCall(0).args[1].posts.$slice[1]).to.be.equals(config.pageSize);
 
           })
@@ -434,7 +434,108 @@
 
     });
 
+    describe('getNewestPosts', function () {
 
+      var survey;
+
+      beforeEach(function () {
+
+        sandbox.spy(Survey, 'findOne');
+        app.use(addLogger, surveyController.router, errorHandler);
+        survey = new Survey(surveyData[0]);
+
+      });
+
+      it ('returns 200 with data newer than parameter', function (done) {
+
+        sandbox.stub(query, 'exec').returns(q.resolve(survey));
+        sandbox.spy(survey.posts, 'filter');
+
+        request(app)
+          .get('/eeeeeeef0000000f00001111/posts/100')
+          .expect(200)
+          .expect(function (response) {
+
+            expect(Survey.findOne.getCall(0).args[0]._id).to.be.equals('eeeeeeef0000000f00001111');
+            //expect(Survey.findOne.getCall(0).args[1].posts.date.$gte).to.be.equals(100);
+            expect(survey.posts.filter.calledOnce).to.be.true;
+            expect(response.body.length).to.be.equals(survey.posts.length);
+            expect(response.body[0].message).to.be.equals('10000 bla bla bla bla');
+            expect(response.body[9].message).to.be.equals('1000 bla bla bla bla');
+
+          })
+          .end(done);
+
+      });
+
+      it ('returns 204 when no data is returned', function (done) {
+
+        survey.posts = [];
+        sandbox.stub(query, 'exec').returns(q.resolve(survey));
+
+        request(app)
+          .get('/eeeeeeef0000000f00001111/posts/100')
+          .expect(204)
+          .expect(function (response) {
+
+            expect(Survey.findOne.getCall(0).args[0]._id).to.be.equals('eeeeeeef0000000f00001111');
+            //expect(Survey.findOne.getCall(0).args[1].posts.date.$gte).to.be.equals(100);
+            expect(response.body).to.be.empty;
+
+          })
+          .end(done);
+
+      });
+
+      it ('returns 404 when called with an invalid id', function (done) {
+
+        sandbox.stub(query, 'exec').returns(q.resolve(null));
+
+        request(app)
+          .get('/0000000f0000000f00000000/posts/100')
+          .expect(404)
+          .expect(function (response) {
+
+            expect(Survey.findOne.getCall(0).args[0]._id).to.be.equals('0000000f0000000f00000000');
+            expect(response.body.message).to.be.equals('notFound');
+
+          })
+          .end(done);
+
+      });
+
+      it ('returns 500 when mongo throws an error', function (done) {
+
+        sandbox.stub(query, 'exec').returns(q.reject(new Error('mongoError')));
+
+        request(app)
+          .get('/eeeeeeef0000000f00001111/posts/100')
+          .expect(500)
+          .expect(function (response) {
+
+            expect(Survey.findOne.calledOnce).to.be.true;
+            expect(response.body.message).to.be.equals('mongoError');
+
+          })
+          .end(done);
+
+      });
+
+      it ('returns 500 when time is not an integer', function (done) {
+
+        sandbox.stub(query, 'exec').returns(q.reject(new Error('mongoError')));
+
+        request(app)
+          .get('/eeeeeeef0000000f00001111/posts/wrongTime')
+          .expect(404)
+          .expect(function (response) {
+            expect(Survey.findOne.calledOnce).to.be.false;
+          })
+          .end(done);
+
+      });
+
+    });
 
   });
 
