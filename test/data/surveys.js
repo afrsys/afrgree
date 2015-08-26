@@ -12,7 +12,6 @@ module.exports = [{
     'sunt in culpa qui officia deserunt mollit anim id est laborum.',
   votes: [
     { user: 'aaaaaaaf0000000f00001111', option: true },
-    { user: 'aaaaaaaf0000000f00002222', option: true },
     { user: 'aaaaaaaf0000000f00003333', option: false },
     { user: 'aaaaaaaf0000000f00004444', option: true }
   ],
