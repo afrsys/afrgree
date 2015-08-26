@@ -16,6 +16,10 @@
   "bugs": {
     "url": "https://github.com/afrsys/afrgree/issues"
   },
+  "scripts": {
+    "start": "node target/build/index.js",
+    "postinstall": "gulp build"
+  },
   "homepage": "https://github.com/afrsys/afrgree",
   "devDependencies": {
     "browser-sync": "^2.8.2",
