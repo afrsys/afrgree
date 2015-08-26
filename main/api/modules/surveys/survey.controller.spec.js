@@ -214,6 +214,56 @@
 
     });
 
+    describe('create', function () {
+
+      beforeEach(function () {
+
+        app.use(addLogger, addUser(new User(userData[0])), surveyController.router, errorHandler);
+
+      });
+
+      it ('returns 201 with the new survey', function (done) {
+
+        sandbox.stub(Survey.prototype, 'save', function (callback) {
+          callback(null, this);
+
+        });
+
+        request(app)
+        .post('/')
+        .send({ title: 'title', description: 'description', closeDate: Date.now() + (3600 * 1000) })
+        .expect(201)
+        .expect(function (response) {
+
+          expect(response.body.title).to.be.equals('title');
+          expect(Survey.prototype.save.called).to.be.true;
+
+        })
+        .end(done);
+
+      });
+
+      it ('returns 500 on error', function (done) {
+
+        sandbox.stub(Survey.prototype, 'save').yields(new Error('mongoError'));
+
+        request(app)
+        .post('/')
+        .send({ title: 'title', description: 'description', closeDate: Date.now() + (3600 * 1000) })
+        .expect(500)
+        .expect(function (response) {
+
+          expect(response.body.message).to.be.equals('mongoError');
+          expect(Survey.prototype.save.called).to.be.true;
+
+        })
+        .end(done);
+
+      });
+    });
+
+ //TODO Missing arguments.
+
     describe('post', function () {
 
       beforeEach(function () {

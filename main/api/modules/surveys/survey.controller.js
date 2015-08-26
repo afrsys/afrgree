@@ -27,6 +27,25 @@
 
   });
 
+  router.post('/', function (req, res, next) {
+    
+    var survey = new Survey();
+
+    survey.title = req.body.title;
+    survey.description = req.body.description;
+    survey.closeDate = req.body.closeDate;
+    /*Survey.create({ title: req.body.title, description: req.body.description, closeDate: new Date(req.body.closeDate)});
+    .then(function (data) {
+      return res.status(201).jsonp(data);
+    }, next);*/
+    survey.save(function (err, data) {
+      if(!err) {
+        return res.status(201).jsonp(data);
+      } else next(err);
+    });
+
+  });
+
   router.get('/:id', function (req, res, next) {
 
     Survey.findOne({ _id: req.params.id }, { votes: 0, posts: 0 })
