@@ -69,9 +69,9 @@
         surveysService.getNewestPosts(ctrl.survey._id, new Date(lastPost.date).getTime())
         .then(function (getResponse) {
 
-          console.log(getResponse);
-          Array.prototype.unshift.apply(ctrl.survey.posts, getResponse.data);
-          ctrl.lastNewestLoad = Date.now();
+          if (getResponse.data && getResponse.data.length > 0) {
+            Array.prototype.unshift.apply(ctrl.survey.posts, getResponse.data);
+          }
 
         }).catch(function (getError) {
 

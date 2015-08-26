@@ -9,6 +9,7 @@
     description: { type: String, required: true, trim: true },
     createDate: { type: Date, required: true, default: Date.now },
     closeDate: { type: Date, required: true },
+    author: { type: ObjectId, required: true, ref: 'users' },
     votes: [{
       user: { type: ObjectId, required: true, ref: 'users' },
       option: { type: Boolean, required: true }

@@ -14,6 +14,14 @@
       return $http.get('/api/surveys/?i=' + i);
     };
 
+    srvc.create = function (title, description, closeDate) {
+      return $http.post('/api/surveys/', {
+        title: title,
+        description: description,
+        closeDate: closeDate
+      });
+    };
+
     srvc.detail = function (id) {
       return $http.get('/api/surveys/' + id);
     };
@@ -27,7 +35,7 @@
     };
 
     srvc.getNewestPosts = function (id, time) {
-      return $http.get('/api/surveys/' + id + '/posts/' + time);
+      return $http.get('/api/surveys/' + id + '/posts/' + (time || 0));
     };
 
     return srvc;

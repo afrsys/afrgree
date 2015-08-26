@@ -5,7 +5,7 @@
     .module('afrgree.surveys')
     .controller('SurveyCreateCtrl', SurveyCreateCtrl);
 
-  function SurveyCreateCtrl($state) {
+  function SurveyCreateCtrl($state, alertService, surveysService) {
   
     var ctrl = this;
   
@@ -14,8 +14,18 @@
 
     ctrl.create = function () {
 
-      console.log({ title: this.title, description: this.description });
-      $state.go('surveys.list');
+      surveysService.create(this.title, this.description, Date.now() + (7 * 24 * 3600 * 1000))
+      .then(function () {
+
+        alertService.info('Pesquisa criada.');
+        $state.go('surveys.list');
+
+      }).catch(function (error) {
+
+        console.log(error);
+        alertService.error('Não foi possível criar a pesquisa.');
+      
+      });
 
     };
 

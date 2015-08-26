@@ -8,13 +8,14 @@
   var express = require('express');
   var request = require('supertest');
   var expect = require('chai').expect;
-  var q = require('q');
+  var Q = require('q');
   var mocks = require('../../../../test/mocks');
-  var surveyController = require('./survey.controller.js');
-  var Survey = require('./Survey.js');
-  var User = require('../users/User.js');
+  var surveyController = require('./survey.controller');
+  var Survey = require('./Survey');
+  var User = require('../users/User');
 
   var mongoose = require('mongoose');
+  var mongoHelper = require('../../../../test/mongoHelper');
   var surveyData = require('../../../../test/data/surveys');
   var userData = require('../../../../test/data/users');
 
@@ -56,11 +57,20 @@
       sandbox.spy(query, 'limit');
       sandbox.spy(query, 'sort');
       sandbox.spy(query, 'skip');
-
+      Q.all([
+        mongoHelper.connect('mongodb://localhost/survey-controller_DROPME'),
+        mongoHelper.clear(),
+        User.create(userData),
+        Survey.create(surveyData)
+      ]);
+      
     });
 
     afterEach(function () {
+
       sandbox.restore();
+      mongoHelper.dropAndClose();
+
     });
 
     describe('list', function () {
@@ -72,7 +82,7 @@
       it ('returns 200 with data', function (done) {
 
         sandbox.spy(Survey, 'find');
-        sandbox.stub(query, 'exec').returns(q.resolve(surveyData));
+        sandbox.stub(query, 'exec').returns(Q.resolve(surveyData));
 
         request(app)
           .get('/')
@@ -93,7 +103,7 @@
 
       it ('returns 200 with data and skip is called with 20', function (done) {
 
-        sandbox.stub(query, 'exec').returns(q.resolve(surveyData));
+        sandbox.stub(query, 'exec').returns(Q.resolve(surveyData));
 
         request(app)
           .get('/?i=20')
@@ -112,7 +122,7 @@
 
       it ('returns 204 when no data is found', function (done) {
 
-        sandbox.stub(query, 'exec').returns(q.resolve([]));
+        sandbox.stub(query, 'exec').returns(Q.resolve([]));
 
         request(app)
           .get('/?i=999999')
@@ -131,7 +141,7 @@
 
       it ('returns 500 when mongo throws an error', function (done) {
 
-        sandbox.stub(query, 'exec').returns(q.reject(new Error('mongoError')));
+        sandbox.stub(query, 'exec').returns(Q.reject(new Error('mongoError')));
 
         request(app)
           .get('/?i=999999')
@@ -161,7 +171,7 @@
 
       it ('returns 200 with data', function (done) {
 
-        sandbox.stub(query, 'exec').returns(q.resolve(surveyData[0]));
+        sandbox.stub(query, 'exec').returns(Q.resolve(surveyData[0]));
 
         request(app)
           .get('/eeeeeeef0000000f00001111')
@@ -180,7 +190,7 @@
 
       it ('returns 404 with no data when called with wrong id', function (done) {
 
-        sandbox.stub(query, 'exec').returns(q.resolve());
+        sandbox.stub(query, 'exec').returns(Q.resolve());
 
         request(app)
           .get('/0000000f0000000f00000000')
@@ -197,7 +207,7 @@
 
       it ('returns 500 when mongo throws an error', function (done) {
 
-        sandbox.stub(query, 'exec').returns(q.reject(new Error('mongoError')));
+        sandbox.stub(query, 'exec').returns(Q.reject(new Error('mongoError')));
 
         request(app)
           .get('/eeeeeeef0000000f00001111')
@@ -217,27 +227,118 @@
     describe('create', function () {
 
       beforeEach(function () {
-
         app.use(addLogger, addUser(new User(userData[0])), surveyController.router, errorHandler);
-
       });
 
       it ('returns 201 with the new survey', function (done) {
-
-        sandbox.stub(Survey.prototype, 'save', function (callback) {
-          callback(null, this);
-
-        });
 
         request(app)
         .post('/')
         .send({ title: 'title', description: 'description', closeDate: Date.now() + (3600 * 1000) })
         .expect(201)
         .expect(function (response) {
-
+          
           expect(response.body.title).to.be.equals('title');
-          expect(Survey.prototype.save.called).to.be.true;
+          expect(response.body.description).to.be.equals('description');
+          expect(parseInt(new Date(response.body.closeDate).getTime() / 10000))
+          .to.be.equals(parseInt((Date.now() + (3600 * 1000)) / 10000));
+          expect(response.body._id).to.be.defined;
+          expect(parseInt(new Date(response.body.createDate).getTime() / 10000))
+          .to.be.equals(parseInt(Date.now() / 10000));
 
+        }).end(function (err, response) {
+
+          if (!err) {
+              
+            Survey.findOne({ _id: response.body._id })
+            .then(function (survey) {
+
+              expect(survey).to.exists;
+              done();
+
+            }, done);
+
+          } else { done(err); }
+
+        });
+
+      });
+
+      it ('returns 400 when missing title', function (done) {
+
+        sandbox.spy(Survey.prototype, 'save');
+        sandbox.spy(query, 'exec');
+
+        request(app)
+        .post('/')
+        .send({ description: 'description', closeDate: Date.now() + (3600 * 1000) })
+        .expect(400)
+        .expect(function (response) {
+          expect(Survey.prototype.save.called).to.be.false;
+        })
+        .end(done);
+
+      });
+
+      it ('returns 400 when missing description', function (done) {
+
+        sandbox.spy(Survey.prototype, 'save');
+        sandbox.spy(query, 'exec');
+
+        request(app)
+        .post('/')
+        .send({ title: 'title', closeDate: Date.now() + (3600 * 1000) })
+        .expect(400)
+        .expect(function (response) {
+          expect(Survey.prototype.save.called).to.be.false;
+        })
+        .end(done);
+
+      });
+
+      it ('returns 400 when missing closeDate', function (done) {
+
+        sandbox.spy(Survey.prototype, 'save');
+        sandbox.spy(query, 'exec');
+
+        request(app)
+        .post('/')
+        .send({ title: 'title', description: 'description' })
+        .expect(400)
+        .expect(function (response) {
+          expect(Survey.prototype.save.called).to.be.false;
+        })
+        .end(done);
+
+      });
+
+      it ('returns 400 when closeDate is invalid', function (done) {
+
+        sandbox.spy(Survey.prototype, 'save');
+        sandbox.spy(query, 'exec');
+
+        request(app)
+        .post('/')
+        .send({ title: 'title', description: 'description', closeDate: new Date(0).toString() })
+        .expect(400)
+        .expect(function (response) {
+          expect(Survey.prototype.save.called).to.be.false;
+        })
+        .end(done);
+
+      });
+
+      it ('returns 400 when closeDate is invalid', function (done) {
+
+        sandbox.spy(Survey.prototype, 'save');
+        sandbox.spy(query, 'exec');
+
+        request(app)
+        .post('/')
+        .send({ title: 'title', description: 'description', closeDate: 'invalidDate' })
+        .expect(400)
+        .expect(function (response) {
+          expect(Survey.prototype.save.called).to.be.false;
         })
         .end(done);
 
@@ -260,9 +361,8 @@
         .end(done);
 
       });
-    });
 
- //TODO Missing arguments.
+    });
 
     describe('post', function () {
 
@@ -287,7 +387,7 @@
 
         });
 
-        sandbox.stub(query, 'exec').returns(q.resolve(new Survey(surveyData[0])));
+        sandbox.stub(query, 'exec').returns(Q.resolve(new Survey(surveyData[0])));
 
         request(app)
         .post('/eeeeeeef0000000f00001111/posts')
@@ -308,7 +408,7 @@
       it ('returns 404 when the id is invalid', function (done) {
 
         sandbox.spy(Survey.prototype, 'save');
-        sandbox.stub(query, 'exec').returns(q.resolve(null));
+        sandbox.stub(query, 'exec').returns(Q.resolve(null));
 
         request(app)
         .post('/eeeeeeef0000000feeeeeeee/posts')
@@ -327,7 +427,7 @@
       it ('returns 500 when find throws an error', function (done) {
 
         sandbox.stub(Survey.prototype, 'save').yields(new Error('mongoSaveError'));
-        sandbox.stub(query, 'exec').returns(q.resolve(new Survey(surveyData[0])));
+        sandbox.stub(query, 'exec').returns(Q.resolve(new Survey(surveyData[0])));
 
         request(app)
         .post('/eeeeeeef0000000feeeeeeee/posts')
@@ -340,7 +440,7 @@
       it ('returns 500 when find throws an error', function (done) {
 
         sandbox.spy(Survey.prototype, 'save');
-        sandbox.stub(query, 'exec').returns(q.reject(new Error('mongoFindError')));
+        sandbox.stub(query, 'exec').returns(Q.reject(new Error('mongoFindError')));
 
         request(app)
         .post('/eeeeeeef0000000feeeeeeee/posts')
@@ -368,7 +468,7 @@
         expiredSurvey.closeDate = Date.now() - 1 * 24 * 3600 * 1000;
 
         sandbox.spy(Survey.prototype, 'save');
-        sandbox.stub(query, 'exec').returns(q.resolve(expiredSurvey));
+        sandbox.stub(query, 'exec').returns(Q.resolve(expiredSurvey));
 
         request(app)
         .post('/eeeeeeef0000000f00002222/posts')
@@ -397,7 +497,7 @@
 
       it ('returns 200 with data from 0 whe no i is passed', function (done) {
 
-        sandbox.stub(query, 'exec').returns(q.resolve(survey));
+        sandbox.stub(query, 'exec').returns(Q.resolve(survey));
 
         request(app)
           .get('/eeeeeeef0000000f00001111/posts')
@@ -417,7 +517,7 @@
       it ('returns 200 with data with data from i', function (done) {
 
         survey.posts = [{ _id: 'aaaaaaaf0000000f00001111' }];
-        sandbox.stub(query, 'exec').returns(q.resolve(survey));
+        sandbox.stub(query, 'exec').returns(Q.resolve(survey));
 
         request(app)
           .get('/eeeeeeef0000000f00001111/posts?i=20')
@@ -436,7 +536,7 @@
       it ('returns 204 when no data is retrieved empty array', function (done) {
 
         survey.posts = [];
-        sandbox.stub(query, 'exec').returns(q.resolve(survey));
+        sandbox.stub(query, 'exec').returns(Q.resolve(survey));
 
         request(app)
           .get('/eeeeeeef0000000f00001111/posts?i=20')
@@ -450,7 +550,7 @@
 
       it ('returns 404 with no data when called with wrong id', function (done) {
 
-        sandbox.stub(query, 'exec').returns(q.resolve());
+        sandbox.stub(query, 'exec').returns(Q.resolve());
 
         request(app)
           .get('/0000000f0000000f00000000')
@@ -467,7 +567,7 @@
 
       it ('returns 500 when mongo throws an error', function (done) {
 
-        sandbox.stub(query, 'exec').returns(q.reject(new Error('mongoError')));
+        sandbox.stub(query, 'exec').returns(Q.reject(new Error('mongoError')));
 
         request(app)
           .get('/eeeeeeef0000000f00001111')
@@ -498,7 +598,7 @@
 
       it ('returns 200 with data newer than parameter', function (done) {
 
-        sandbox.stub(query, 'exec').returns(q.resolve(survey));
+        sandbox.stub(query, 'exec').returns(Q.resolve(survey));
         sandbox.spy(survey.posts, 'filter');
 
         request(app)
@@ -521,7 +621,7 @@
       it ('returns 204 when no data is returned', function (done) {
 
         survey.posts = [];
-        sandbox.stub(query, 'exec').returns(q.resolve(survey));
+        sandbox.stub(query, 'exec').returns(Q.resolve(survey));
 
         request(app)
           .get('/eeeeeeef0000000f00001111/posts/100')
@@ -539,7 +639,7 @@
 
       it ('returns 404 when called with an invalid id', function (done) {
 
-        sandbox.stub(query, 'exec').returns(q.resolve(null));
+        sandbox.stub(query, 'exec').returns(Q.resolve(null));
 
         request(app)
           .get('/0000000f0000000f00000000/posts/100')
@@ -556,7 +656,7 @@
 
       it ('returns 500 when mongo throws an error', function (done) {
 
-        sandbox.stub(query, 'exec').returns(q.reject(new Error('mongoError')));
+        sandbox.stub(query, 'exec').returns(Q.reject(new Error('mongoError')));
 
         request(app)
           .get('/eeeeeeef0000000f00001111/posts/100')
@@ -573,7 +673,7 @@
 
       it ('returns 500 when time is not an integer', function (done) {
 
-        sandbox.stub(query, 'exec').returns(q.reject(new Error('mongoError')));
+        sandbox.stub(query, 'exec').returns(Q.reject(new Error('mongoError')));
 
         request(app)
           .get('/eeeeeeef0000000f00001111/posts/wrongTime')

@@ -1,6 +1,7 @@
 module.exports = [{
   _id: 'eeeeeeef0000000f00000000',
   title: 'Declaramos estado de greve?',
+  author: 'aaaaaaaf0000000f00001111',
   createDate: Date.now(),
   closeDate: Date.now() + (24 * 3600 * 1000),
   description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod ' +
@@ -30,6 +31,7 @@ module.exports = [{
 }, {
   _id: 'eeeeeeef0000000f00001111',
   title: 'Devemos aceitar o fim do nível 5?',
+  author: 'aaaaaaaf0000000f00002222',
   createDate: Date.now() - 30000,
   closeDate: Date.now() - 10000,
   description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod ' +

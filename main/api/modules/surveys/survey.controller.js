@@ -28,21 +28,22 @@
   });
 
   router.post('/', function (req, res, next) {
-    
-    var survey = new Survey();
 
-    survey.title = req.body.title;
-    survey.description = req.body.description;
-    survey.closeDate = req.body.closeDate;
-    /*Survey.create({ title: req.body.title, description: req.body.description, closeDate: new Date(req.body.closeDate)});
-    .then(function (data) {
-      return res.status(201).jsonp(data);
-    }, next);*/
-    survey.save(function (err, data) {
-      if(!err) {
+    if (req.body.title && req.body.description && req.body.closeDate &&
+      new Date(req.body.closeDate) > Date.now()) {
+    
+      Survey.create({
+        title: req.body.title,
+        description: req.body.description,
+        author: req.user._id,
+        closeDate: new Date(req.body.closeDate)
+      }).then(function (data) {
         return res.status(201).jsonp(data);
-      } else next(err);
-    });
+      }, next);
+
+    } else {
+      return next(errorCode(new ReferenceError(), 400));
+    }
 
   });
 
