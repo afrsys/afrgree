@@ -79,7 +79,7 @@
   });
 
   gulp.task('build', function (cb) {
-    runSequence('clear', 'test', [
+    runSequence('clear', [
       'build-web',
       'build-app',
       'build-sass',
@@ -128,7 +128,7 @@
 
   });
 
-  gulp.task('run', ['build'], function () {
+  gulp.task('run', ['test', 'build'], function () {
 
     var config = require('./target/build/api/config'),
       restarted = false;
