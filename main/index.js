@@ -1,13 +1,22 @@
 (function () {
 
   'use strict';
-
+  console.log('A');
   var cluster = require('cluster');
-  var cpus = require('os').cpus().length;
+  var server = require('./api/server');
 
-  cluster.setupMaster({ exec: __dirname + '/api/server.js'});
-  for (var i = 0; i < cpus; i++) {
-    cluster.fork();
+  if (cluster.isMaster) {
+
+    var cpus = require('os').cpus().length;
+
+    for (var i = 0; i < cpus; i += 1) {
+        cluster.fork();
+    }
+
+  } else {
+console.log('X');
+    server.run();
+
   }
 
 })();
