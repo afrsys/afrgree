@@ -66,12 +66,6 @@
 
     if (req.body.message) {
 
-      var post = {
-        message: req.body.message,
-        user: { _id: req.user._id, name: req.user.name },
-        date: Date.now()
-      };
-
       Survey.findOne({ _id: req.params.id })
       .exec()
       .then(function (survey) {
@@ -79,10 +73,11 @@
         if (survey) {
 
           if (survey.isActive) {
+            
+            var post = survey.addPost(req.user._id, req.body.message);
 
-            survey.posts.unshift(post);
+            post.user = { _id: post.user, name: req.user.name };
             survey.save(function (err) {
-
               if (!err) {
                 res.status(201).jsonp(post);
               } else {

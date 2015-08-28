@@ -3,7 +3,6 @@
   'use strict';
   /*jshint expr: true*/
   var expect = require('chai').expect;
-  var _ = require('lodash');
   var Survey = require('./Survey.js');
   var surveyData = require('../../../../test/data/surveys');
 
@@ -13,7 +12,7 @@
       expect(Survey).to.exists;
     });
 
-    describe.only('vote', function () {
+    describe('vote', function () {
 
       it ('Adds the vote if it does not exists', function () {
         
