@@ -53,25 +53,51 @@
 
   Schema.methods.vote = function (userId, option) {
 
-    var vote = _.find(this.votes, function (vote) {
-      return vote.user.equals(userId) || (vote.user._id && vote.user._id.equals(userId));
-    });
+    if (checkVote(this, option)) {
+      
+      _.forEach(this.ballot, function (item) {
+      
+        _.remove(item.votes, function (vote) {
+          return vote.user.equals(userId) || (vote.user._id && vote.user._id.equals(userId));
+        });
+            
+      });
 
-    if (vote) {
-      vote.option = option;
+      var ballot = _.find(this.ballot, { option: option });
+
+      if (!ballot) {
+        ballot = { option: option, votes: [] };
+        this.ballot.push(ballot);
+      }
+
+      ballot.votes.push({ user: userId });
+
+      return true;
+
     } else {
 
-      vote = {
-        user: userId,
-        option: option
-      };
-      this.votes.push(vote);
+      return false;
 
     }
 
-    return vote;
-
   };
+
+  function checkVote (survey, option) {
+
+    switch(survey.type) {
+
+      case 'Simple':
+        return 'True False Abstent'.split(' ').indexOf(option) >= 0;
+      case 'Multiple':
+        return _.findIndex(survey.ballot, function (item) {
+          return item.option === option;
+        }) >= 0;
+      default:
+        return true;
+
+    }
+
+  }
 
   module.exports = mongoose.model('surveys', Schema);
 
