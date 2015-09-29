@@ -1,0 +1,68 @@
+$navbar-color: #000014;
+$background-color: #DDD;
+$workspace-background-color: #FFF;
+$not-small-screen: "(min-width: 768px)";
+$medium-screen: "(min-width: 768px) and (max-width: 1023px)";
+$large-screen: "(min-width: 1024px)";
+
+body {
+  background: $background-color;
+}
+
+.workspace {
+  background: $workspace-background-color;
+  padding-bottom: 20px;
+}
+
+.margin-top-10 {
+  margin-top: 10px;
+}
+
+.longtext {
+  white-space: pre-wrap
+}
+
+.navbar {
+  @media #{$not-small-screen} {
+    border-radius: 0px;
+  } 
+}
+
+.navbar {
+  background-color: $navbar-color;
+  margin-bottom: 0;
+}
+
+.alert-panel {
+  position: fixed;
+  top: 120px;
+  right: 0;
+  left: 0;
+  margin: 0 auto;
+  padding: 0; 
+  z-index: 99999;
+}
+.alert-panel .alert {
+  margin: 0 40px 10px;
+}
+
+.list-group-item.ng-move,
+.list-group-item.ng-enter,
+.list-group-item.ng-leave {
+  -webkit-transition:all linear 0.5s;
+  transition:all linear 0.5s;
+}
+
+.list-group-item.ng-leave.ng-leave-active,
+.list-group-item.ng-move,
+.list-group-item.ng-enter {
+  opacity:0;
+  background: #CCC;
+}
+
+.list-group-item.ng-leave,
+.list-group-item.ng-move.ng-move-active,
+.list-group-item.ng-enter.ng-enter-active {
+  opacity:1;
+  background: #FFF;
+}

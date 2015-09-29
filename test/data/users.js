@@ -4,7 +4,7 @@ module.exports = [{
     email: 'homer@simpsons.com',
     credentials: {
       password : {
-        hash: '$2a$04$wp/Yh.0/NVnCWQJGqSlE5OZM7RB4c1MwYuiAfEoJAewiinA3PvpH6'
+        hash: '$2a$04$4rSJiwVc8spPeU3gYyk56e621PsoZL/J3Msmc0xzhBpGwsoZDblvS'
       }
     }
   }, {
@@ -13,7 +13,7 @@ module.exports = [{
     email: 'ned@simpsons.com',
     credentials: {
       password : {
-        hash: '$2a$04$wp/Yh.0/NVnCWQJGqSlE5OZM7RB4c1MwYuiAfEoJAewiinA3PvpH6'
+        hash: '$2a$04$4rSJiwVc8spPeU3gYyk56e621PsoZL/J3Msmc0xzhBpGwsoZDblvS'
       }
     }
   }, {
@@ -22,7 +22,7 @@ module.exports = [{
     email: 'burn.baby.burns@simpsons.com',
     credentials: {
       password : {
-        hash: '$2a$04$wp/Yh.0/NVnCWQJGqSlE5OZM7RB4c1MwYuiAfEoJAewiinA3PvpH6'
+        hash: '$2a$04$4rSJiwVc8spPeU3gYyk56e621PsoZL/J3Msmc0xzhBpGwsoZDblvS'
       }
     }
   }, {
@@ -31,7 +31,7 @@ module.exports = [{
     email: 'mayor@simpsons.com',
     credentials: {
       password : {
-        hash: '$2a$04$wp/Yh.0/NVnCWQJGqSlE5OZM7RB4c1MwYuiAfEoJAewiinA3PvpH6'
+        hash: '$2a$04$4rSJiwVc8spPeU3gYyk56e621PsoZL/J3Msmc0xzhBpGwsoZDblvS'
       }
     }
   }];

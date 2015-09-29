@@ -1,0 +1,20 @@
+<div ng-controller="AuthController as authCtrl" class="container">
+  <div class="row">
+    <div class="col-xs-0 col-sm-1 col-md-4"></div>
+    <div class="col-xs-12 col-sm-10 col-md-4">
+      <form name="authForm" role="form">
+        <h2 class="form-signin-heading">Acessar o sistema</h2>
+        <div class="form-group">
+          <label for="authEmail">Email</label>
+          <input id="authEmail" type="email" class="form-control input-lg" required autofocus ng-model="authCtrl.email" >
+        </div>
+          <div class="form-group">
+            <label for="authPassword">Senha</label>
+            <input id="authPassword" type="password" class="form-control input-lg" required ng-model="authCtrl.password">
+          </div>
+          <button class="btn btn-lg btn-primary btn-block" ng-click="authCtrl.passwordLogin()" ng-disabled="authForm.$invalid">Login</button>
+      </form>
+    </div>
+    <div class="col-xs-0 col-sm-1 col-md-4"></div>
+  </div>
+</div>
