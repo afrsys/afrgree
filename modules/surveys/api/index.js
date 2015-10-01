@@ -1,21 +1,24 @@
 'use strict';
-var Survey = require('./Survey');
-var errorcode = require('errorcode');
-var config = require('../../../config');
+
 var router = require('express').Router();
+var Survey = require('./Survey');
+var security = require('../../users/api/security');
 
 module.exports = router;
 
+router.use(security.isAuth());
+
 router.get('/', function (req, res, next) {
 
-  var i = req.query.i || 0;
+  var i = parseInt(req.query.i || 0);
 
-  Survey.find({}, { title: 1, closeDate: 1 })
-  .sort({ closeDate: -1 })
-  .skip(parseInt(i))
+  Survey.find({}, { title: 1, closeDate: 1, lastUpdate: 1 })
+  .sort({ lastUpdate: 'desc' })
+  .skip(i)
   .limit(20) //redis
   .exec()
   .then(function (data) {
+    
     if (data && data.length > 0) {
       return res.jsonp(data);
     } else {
@@ -29,7 +32,7 @@ router.post('/', function (req, res, next) {
 
   if (req.body.title && req.body.description && req.body.closeDate &&
     new Date(req.body.closeDate) > Date.now()) {
-  
+
     Survey.create({
       title: req.body.title,
       description: req.body.description,
@@ -38,9 +41,8 @@ router.post('/', function (req, res, next) {
     }).then(function (data) {
       return res.status(201).jsonp(data);
     }, next);
-
   } else {
-    return next(errorcode(400, new ReferenceError()));
+    return next(new Error('core.missing'));
   }
 
 });
@@ -54,7 +56,7 @@ router.get('/:id', function (req, res, next) {
     if (survey) {
       return res.jsonp(survey);
     } else {
-      return next(errorcode(404, new Error('notFound')));
+      return next(new Error('core.notFound'));
     }
   }, next);
 
@@ -85,18 +87,18 @@ router.post('/:id/posts', function (req, res, next) {
           });
 
         } else {
-          return next(errorcode(400, new ReferenceError()));
+          return next(new Error('core.invalidState'));
         }
 
       } else {
 
-        return next(errorcode(404, new Error('notFound')));
+        return next(new Error('core.notFound'));
       }
 
     }, next);
 
   } else {
-    return next(errorcode(400, new ReferenceError()));
+    return next(new Error('core.missing'));
   }
 
 });
@@ -105,7 +107,7 @@ router.get('/:id/posts', function (req, res, next) {
 
   Survey.findOne({ _id: req.params.id }, {
     votes: 0, description: 0, closeDate: 0, createDate: 0, title:0,
-    posts: { $slice: [parseInt(req.query.i || 0), config.pageSize] } })
+    posts: { $slice: [parseInt(req.query.i || 0), 20] } })
   .populate('posts.user', 'name')
   .exec()
   .then(function (survey) {
@@ -119,7 +121,7 @@ router.get('/:id/posts', function (req, res, next) {
       }
 
     } else {
-      return next(errorcode(404, new Error('notFound')));
+      return next(new Error('core.notFound'));
     }
   }, next);
 
@@ -140,15 +142,19 @@ router.get('/:id/posts/:time(\\d+)', function (req, res, next) {
         var result = survey.posts.filter(function (post) {
           return post.date.getTime() > time;
         }).reverse();
-        
-        return res.jsonp(result);
+
+        if (result.length > 0) {
+          return res.jsonp(result);
+        } else {
+          return res.status(204).send();
+        }
 
       } else {
         return res.status(204).send();
       }
 
     } else {
-      return next(errorcode(new Error('notFound'), 404));
+      return next(new Error('core.notFound'));
     }
   }, next);
 

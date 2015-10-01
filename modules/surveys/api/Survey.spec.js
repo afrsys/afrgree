@@ -3,7 +3,7 @@
   'use strict';
   /*jshint expr: true*/
   var expect = require('chai').expect;
-  var ObjectId= require('mongoose').Types.ObjectId;
+  var ObjectId = require('mongoose').Types.ObjectId;
   var Survey = require('./Survey.js');
   var surveyData = require('../../../test/data/surveys');
   var _ = require('lodash');
@@ -24,7 +24,6 @@
           vote = survey.vote('aaaaaaaf0000000f00002222', 'True');
           expect(vote).to.be.true;
           expect(option.votes.length).to.be.equals(4);
-          //expect(_.find(option.votes, { user: 'aaaaaaaf0000000f00002222' })).to.be.defined;
 
         });
 
@@ -34,6 +33,7 @@
           var vote = null;
           var TrueOption = _.find(survey.ballot, { option: 'True' });
           var FalseOption = _.find(survey.ballot, { option: 'False' });
+          var userId = new ObjectId('aaaaaaaf0000000f00001111');
           
           expect(TrueOption.votes.length).to.be.equals(3);
           expect(FalseOption).to.be.undefined;
@@ -42,8 +42,8 @@
           FalseOption = _.find(survey.ballot, { option: 'False' });
           expect(TrueOption.votes.length).to.be.equals(2);
           expect(FalseOption.votes.length).to.be.equals(1);
-          expect(_.filter(TrueOption.votes, { user: new ObjectId('aaaaaaaf0000000f00001111') }).length).to.be.equals(0);
-          expect(_.filter(FalseOption.votes, { user: new ObjectId('aaaaaaaf0000000f00001111') }).length).to.be.equals(1);
+          expect(_.filter(TrueOption.votes, { user: userId }).length).to.be.equals(0);
+          expect(_.filter(FalseOption.votes, { user: userId }).length).to.be.equals(1);
 
         });
 
@@ -53,6 +53,7 @@
           var vote = null;
           var TrueOption = _.find(survey.ballot, { option: 'True' });
           var AbstentOption = _.find(survey.ballot, { option: 'Abstent' });
+          var userId = new ObjectId('aaaaaaaf0000000f00001111');
           
           expect(TrueOption.votes.length).to.be.equals(3);
           expect(AbstentOption).to.be.undefined;
@@ -61,8 +62,8 @@
           AbstentOption = _.find(survey.ballot, { option: 'Abstent' });
           expect(TrueOption.votes.length).to.be.equals(2);
           expect(AbstentOption.votes.length).to.be.equals(1);
-          expect(_.filter(TrueOption.votes, { user: new ObjectId('aaaaaaaf0000000f00001111') }).length).to.be.equals(0);
-          expect(_.filter(AbstentOption.votes, { user: new ObjectId('aaaaaaaf0000000f00001111') }).length).to.be.equals(1);
+          expect(_.filter(TrueOption.votes, { user: userId }).length).to.be.equals(0);
+          expect(_.filter(AbstentOption.votes, { user: userId }).length).to.be.equals(1);
 
         });
 

@@ -29,7 +29,7 @@ describe('security', function () {
 
     sandbox = sinon.sandbox.create();
     q.all([
-      User.remove({}),
+      User.remove({}).then(),
       User.create([userdata[0]]),
     ])
     .finally(done);
@@ -161,13 +161,13 @@ describe('security', function () {
 
       var token = jwt.encode({ iss: 'aaaaaaaf0000000f00001111', exp: 10000 }, security.TOKEN_SALT);
 
-      mongoStub.queryError(User, 'mongoError', sandbox);
+      mongoStub.queryError(User, sandbox);
       
       security.verifyToken(req, token, function (err, user) {
           
         expect(err).to.be.not.null;
         expect(user).to.not.be.defined;
-        expect(err.message).to.be.equals('mongoError');
+        expect(err.message).to.be.equals('mongoQueryError');
         done();
 
       });
@@ -252,9 +252,9 @@ describe('security', function () {
 
     });
 
-    it('mongoError reject promise w/ mongoError', function (done) {
+    it('mongoQueryError reject promise w/ mongoQueryError', function (done) {
 
-      mongoStub.queryError(User, 'mongoError', sandbox);
+      mongoStub.queryError(User, sandbox);
 
       security.issueToken('bluescreen@microsoft.com', '1234', 86400000, logger)
         .then(function () {
@@ -262,7 +262,7 @@ describe('security', function () {
         })
         .catch(function (err) {
 
-          expect(err.message).to.be.equals('mongoError');
+          expect(err.message).to.be.equals('mongoQueryError');
           done();
 
         });

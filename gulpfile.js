@@ -22,6 +22,11 @@ var JS_SRC = [
   './modules/**/*.js'
 ];
 
+
+var API_SRC = [
+  './modules/**/api/**/!(*.spec).js'
+]
+
 var APP_SRC = [
   './modules/**/web/**/index.js',
   './modules/**/web/**/!(index)*!(.spec).js'
@@ -183,13 +188,13 @@ gulp.task('test-web', ['build-web'], function (done) {
 
 });
 
-gulp.task('cover', ['test-web'], function (done) {
+gulp.task('cover',function (done) {
 
   var istanbul = require('gulp-istanbul');
   var mocha = require('gulp-mocha');
   var istanbulReport = require('gulp-istanbul-report');
 
-  gulp.src(JS_SRC)
+  gulp.src(API_SRC.concat(APP_SRC))
   .pipe(istanbul({ includeUntested: true }))
   .pipe(istanbul.hookRequire())
   .on('finish', function () {

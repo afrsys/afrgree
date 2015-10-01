@@ -7,7 +7,8 @@ var passport = require('passport');
 var errorcode = require('errorcode');
 var errorcodes = {
   'core.missing': 400,
-  'core.notFound': 501
+  'core.invalidState': 400,
+  'core.notFound': 404
 };
 
 module.exports = function (modules, redis, mongo, logger) {

@@ -31,9 +31,12 @@
 
   });
 
-  Schema.pre('save', function() {
+  /*Schema.pre('save', function(next) {
+    
     this.lastUpdate = Date.now();
-  });
+    next();
+
+  });*/
 
   Schema.virtual('isActive')
   .get(function () {
@@ -104,8 +107,6 @@
     }
 
   }
-
-  
 
   module.exports = mongoose.model('surveys', Schema);
 

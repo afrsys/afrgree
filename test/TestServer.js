@@ -2,7 +2,7 @@
 
 var config = require('../config');
 
-exports.app = function (api, logLevel) {
+exports.app = function (endPoint, api, logLevel) {
 
   process.env.NODE_ENV = 'test';
 
@@ -11,7 +11,7 @@ exports.app = function (api, logLevel) {
   var redis = require('../core/redis')(config.redis, logger.child({ core: 'redis' }));
 
   var router = require('express').Router();
-  router.use('/api', api);
+  router.use(endPoint, api);
 
   var app = require('../core/app')(router, redis, mongoServer.mongo, logger.child({ core: 'app' }));
 

@@ -9,7 +9,7 @@
     var srvc = this;
 
     srvc.passwordAuth = function (email, password) {
-      return $http.post('/users/api/auth/password', { 
+      return $http.post('/users/api/auth/password', {
         mail: email, password: password
       });
     };

@@ -15,7 +15,7 @@ describe('/users/api', function () {
 
   before(function () {
 
-    appServer = TestServer.app(api);
+    appServer = TestServer.app('/users', api);
     app = appServer.app;
 
   });
@@ -63,7 +63,7 @@ describe('/users/api', function () {
     it('Returns 200 with an user and token', function (done) {
 
       supertest(app)
-      .post('/api/auth/password/')
+      .post('/users/auth/password/')
       .send({ email: 'homer@simpsons.com', password: '1234' })
       .expect(200)
       .expect(function (res) {
@@ -82,7 +82,7 @@ describe('/users/api', function () {
     it('Returns 400 when missing email', function (done) {
 
       supertest(app)
-      .post('/api/auth/password/')
+      .post('/users/auth/password/')
       .send({ password: '1234' })
       .expect(400)
       .end(done);
@@ -92,7 +92,7 @@ describe('/users/api', function () {
     it('Returns 400 when missing password', function (done) {
 
       supertest(app)
-      .post('/api/auth/password/')
+      .post('/users/auth/password/')
       .send({ email: 'homer@simpsons.com' })
       .expect(400)
       .end(done);
@@ -102,7 +102,7 @@ describe('/users/api', function () {
     it('Returns 401 when called with wrong password', function (done) {
 
       supertest(app)
-      .post('/api/auth/password/')
+      .post('/users/auth/password/')
       .send({ email: 'homer@simpsons.com', password: 'wrong' })
       .expect(401)
       .end(done);
@@ -112,7 +112,7 @@ describe('/users/api', function () {
     it('Returns 401 when called with wrong email', function (done) {
 
       supertest(app)
-      .post('/api/auth/password/')
+      .post('/users/auth/password/')
       .send({ email: 'homero@simpsons.com.cn', password: '1234' })
       .expect(401)
       .end(done);
@@ -124,7 +124,7 @@ describe('/users/api', function () {
       sandbox.stub(appServer.redis, 'get').yields(new Error('redisError'));
 
       supertest(app)
-      .post('/api/auth/password/')
+      .post('/users/auth/password/')
       .send({ email: 'homer@simpsons.com', password: '1234' })
       .expect(500, { message: 'redisError' })
       .end(done);
@@ -137,7 +137,7 @@ describe('/users/api', function () {
 
     it('Returns 401 when called without token', function (done) {
       supertest(app)
-      .put('/api/auth/password/')
+      .put('/users/auth/password/')
       .send({ oldPassword: '1234', newPassword: '4321' })
       .expect(401)
       .end(done);
@@ -145,7 +145,7 @@ describe('/users/api', function () {
 
     it('Returns 400 when called without oldPassword', function (done) {
       supertest(app)
-      .put('/api/auth/password/')
+      .put('/users/auth/password/')
       .set('Authorization', token)
       .send({ newPassword: '4321' })
       .expect(400)
@@ -154,7 +154,7 @@ describe('/users/api', function () {
 
     it('Returns 400 when called without newPassword', function (done) {
       supertest(app)
-      .put('/api/auth/password/')
+      .put('/users/auth/password/')
       .set('Authorization', token)
       .send({ oldPassword: '1234' })
       .expect(400)
@@ -163,7 +163,7 @@ describe('/users/api', function () {
 
     it('Returns 403 when called with wrong oldPassword', function (done) {
       supertest(app)
-      .put('/api/auth/password/')
+      .put('/users/auth/password/')
       .set('Authorization', token)
       .send({ newPassword: '4321', oldPassword: 'wrong' })
       .expect(403)
@@ -176,7 +176,7 @@ describe('/users/api', function () {
       .returns(q.reject(new Error('unknown')));
       
       supertest(app)
-      .put('/api/auth/password/')
+      .put('/users/auth/password/')
       .set('Authorization', token)
       .send({ oldPassword: '1234', newPassword: '4321' })
       .expect(500)
@@ -190,7 +190,7 @@ describe('/users/api', function () {
       .returns(q.reject(new Error('unknown')));
       
       supertest(app)
-      .put('/api/auth/password/')
+      .put('/users/auth/password/')
       .set('Authorization', token)
       .send({ oldPassword: '1234', newPassword: '4321' })
       .expect(500)
@@ -204,7 +204,7 @@ describe('/users/api', function () {
       .yields(new Error('mongoError'));
 
       supertest(app)
-      .put('/api/auth/password/')
+      .put('/users/auth/password/')
       .set('Authorization', token)
       .send({ oldPassword: '1234', newPassword: '4321' })
       .expect(500)
@@ -214,7 +214,7 @@ describe('/users/api', function () {
 
     it('Returns 200 when everything is ok', function (done) {
       supertest(app)
-      .put('/api/auth/password/')
+      .put('/users/auth/password/')
       .set('Authorization', token)
       .send({ oldPassword: '1234', newPassword: '4321' })
       .expect(200)
