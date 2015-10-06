@@ -1,55 +1,45 @@
 'use strict';
 
+var q = require('q');
+var _ = require('lodash');
 var sinon = require('sinon');
 var expect = require('chai').expect;
 var supertest = require('supertest');
-var q = require('q');
-var _ = require('lodash');
 var api = require('./index.js');
-var security = require('../../users/api/security');
 var User = require('../../users/api/User');
 var Survey = require('./Survey');
-var TestServer = require('../../../test/TestServer');
+var Test = require('../../../test');
 var surveyData = require('../../../test/data/surveys');
 var userData = require('../../../test/data/users');
-var mongoStub = require('../../../test/mongoStub');
 
 describe('/surveys/api', function () {
 
-  var appServer, app, sandbox, token;
+  var testApi, app, sandbox, token;
 
   before(function () {
 
-    appServer = TestServer.app('/surveys', api);
-    app = appServer.app;
+    testApi = Test.Api('/surveys', api);
+    app = testApi.app;
 
   });
 
   after(function () {
-    appServer.close();
+    testApi.close();
   });
 
   beforeEach(function (done) {
-    
+
     sandbox = sinon.sandbox.create();
     
     q.all([
-      User.remove({})
-      .then(User.create(userData)),
-      Survey.remove({})
-      .then(Survey.create(surveyData)),
+      Test.mongoLoader(Survey, surveyData),
+      Test.mongoLoader(User, userData)
     ])
-    .then(function () {
-
-      security.issueToken('homer@simpsons.com', '1234', 86400000, appServer.logger)
-      .then(function (data) {
-
-        token = 'Bearer ' + data.token;
-        done();
-
-      }, done);
-
+    .then(Test.issueToken('homer@simpsons.com', '1234'))
+    .then(function (issuedToken) {
+      token = issuedToken;
     })
+    .then(done)
     .catch(done);
 
   });
@@ -119,7 +109,7 @@ describe('/surveys/api', function () {
 
     it('Returns 500 when mongo throws an error', function (done) {
 
-      mongoStub.queryError(Survey, sandbox);
+      Test.mongoStub.queryError(Survey, sandbox);
       
       supertest(app)
       .get('/surveys')
@@ -169,7 +159,7 @@ describe('/surveys/api', function () {
 
     it('returns 500 when mongo throws an error', function (done) {
 
-      mongoStub.queryError(Survey, sandbox);
+      Test.mongoStub.queryError(Survey, sandbox);
 
       supertest(app)
       .get('/surveys/eeeeeeef0000000f00001111')
@@ -285,7 +275,7 @@ describe('/surveys/api', function () {
 
     it('returns 500 on error', function (done) {
 
-      mongoStub.writeError(Survey, sandbox);
+      Test.mongoStub.writeError(Survey, sandbox);
 
       supertest(app)
       .post('/surveys')
@@ -359,7 +349,7 @@ describe('/surveys/api', function () {
 
     it('returns 500 when save throws an error', function (done) {
 
-      mongoStub.writeError(Survey, sandbox);
+      Test.mongoStub.writeError(Survey, sandbox);
 
       supertest(app)
       .post('/surveys/eeeeeeef0000000f00001111/posts')
@@ -372,7 +362,7 @@ describe('/surveys/api', function () {
 
     it('returns 500 when find throws an error', function (done) {
 
-      mongoStub.queryError(Survey, sandbox);
+      Test.mongoStub.queryError(Survey, sandbox);
 
       supertest(app)
       .post('/surveys/eeeeeeef0000000f00001111/posts')
@@ -464,7 +454,7 @@ describe('/surveys/api', function () {
 
     it('returns 500 when mongo throws an error', function (done) {
 
-      mongoStub.queryError(Survey, sandbox);
+      Test.mongoStub.queryError(Survey, sandbox);
 
       supertest(app)
       .get('/surveys/eeeeeeef0000000f00001111/posts')
@@ -528,7 +518,7 @@ describe('/surveys/api', function () {
 
     it('returns 500 when mongo throws an error', function (done) {
 
-      mongoStub.queryError(Survey, sandbox);
+      Test.mongoStub.queryError(Survey, sandbox);
 
       supertest(app)
       .get('/surveys/eeeeeeef0000000f00001111/posts/100')

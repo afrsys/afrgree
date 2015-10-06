@@ -4,35 +4,31 @@
 var expect = require('chai').expect;
 var sinon = require('sinon');
 var passport = require('passport');
-var q = require('q');
 var jwt = require('jwt-simple');
-var security = require('./security.js');
+var security = require('./security');
 var User = require('./User');
-var mongoStub = require('../../../test/mongoStub');
-var TestServer = require('../../../test/TestServer');
-var userdata = require('../../../test/data/users');
-var logger = TestServer.logger();
+var Test = require('../../../test/');
+var userData = require('../../../test/data/users');
 
 describe('security', function () {
 
-  var mongoServer, sandbox;
+  var testMongo, sandbox;
 
   before(function () {
-    mongoServer = TestServer.mongo(logger);
+    testMongo = Test.Mongo();
   });
 
   after(function () {
-    mongoServer.close();
+    testMongo.close();
   });
 
   beforeEach(function (done) {
 
     sandbox = sinon.sandbox.create();
-    q.all([
-      User.remove({}).then(),
-      User.create([userdata[0]]),
-    ])
-    .finally(done);
+
+    Test.mongoLoader(User, userData)
+    .then(done)
+    .catch(done);
 
   });
 
@@ -58,14 +54,14 @@ describe('security', function () {
 
     beforeEach(function () {
 
-      req.logger = logger;
+      req.logger = Test.logger;
       sandbox.useFakeTimers();
 
     });
 
     it('valid token calls callback with the user', function (done) {
 
-      var token = jwt.encode({ iss: 'aaaaaaaf0000000f00001111', exp: 10 }, security.TOKEN_SALT);
+      var token = jwt.encode({ iss: 'aaaaaaaf0000000f00001111', exp: 10000 }, security.TOKEN_SALT);
 
       security.verifyToken(req, token, function (err, user) {
 
@@ -161,7 +157,7 @@ describe('security', function () {
 
       var token = jwt.encode({ iss: 'aaaaaaaf0000000f00001111', exp: 10000 }, security.TOKEN_SALT);
 
-      mongoStub.queryError(User, sandbox);
+      Test.mongoStub.queryError(User, sandbox);
       
       security.verifyToken(req, token, function (err, user) {
           
@@ -180,7 +176,7 @@ describe('security', function () {
 
     it('valid username and password calls promise', function (done) {
       
-      security.issueToken('homer@simpsons.com', '1234', 86400000, logger)
+      security.issueToken('homer@simpsons.com', '1234', 86400000, Test.logger)
       .then(function (data) {
 
         expect(data.token).to.be.defined;
@@ -196,7 +192,7 @@ describe('security', function () {
     });
 
     it('invalid username reject promise w/ security.userNotFound', function (done) {
-      security.issueToken('homero@simpsons.com.cn', '1234', 86400000, logger)
+      security.issueToken('homero@simpsons.com.cn', '1234', 86400000, Test.logger)
       .then(function () {
         done(new Error('Unexpected call'));
       })
@@ -209,7 +205,7 @@ describe('security', function () {
     });
 
     it('wrong password reject promise w/ security.wrongPassword', function (done) {
-      security.issueToken('homer@simpsons.com', 'noMoreBeer', 86400000, logger)
+      security.issueToken('homer@simpsons.com', 'noMoreBeer', 86400000, Test.logger)
       .then(function () {
         done(new Error('Unexpected call'));
       })
@@ -222,7 +218,7 @@ describe('security', function () {
     });
 
     it('without password reject promise w/ security.wrongPassword', function (done) {
-      security.issueToken('homer@simpsons.com', null, 86400000, logger)
+      security.issueToken('homer@simpsons.com', null, 86400000, Test.logger)
       .then(function () {
         done(new Error('Unexpected call'));
       })
@@ -239,7 +235,7 @@ describe('security', function () {
       var bcrypt = require('bcryptjs');
 
       sandbox.stub(bcrypt, 'compare').yields(new Error('bcryptError'));
-      security.issueToken('homer@simpsons.com', '1234', 86400000, logger)
+      security.issueToken('homer@simpsons.com', '1234', 86400000, Test.logger)
       .then(function () {
         done(new Error('Unexpected call'));
       })
@@ -254,9 +250,9 @@ describe('security', function () {
 
     it('mongoQueryError reject promise w/ mongoQueryError', function (done) {
 
-      mongoStub.queryError(User, sandbox);
+      Test.mongoStub.queryError(User, sandbox);
 
-      security.issueToken('bluescreen@microsoft.com', '1234', 86400000, logger)
+      security.issueToken('bluescreen@microsoft.com', '1234', 86400000, Test.logger)
         .then(function () {
           done(new Error('Unexpected call'));
         })

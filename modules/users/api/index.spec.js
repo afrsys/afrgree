@@ -1,56 +1,40 @@
 'use strict';
 
+var q = require('q');
 var sinon = require('sinon');
 var expect = require('chai').expect;
 var supertest = require('supertest');
 var api = require('./index.js');
-var security = require('./security');
 var User = require('./User');
-var q = require('q');
-var TestServer = require('../../../test/TestServer');
+var Test = require('../../../test/');
+var userData = require('../../../test/data/users');
 
 describe('/users/api', function () {
 
-  var appServer, app, sandbox, token;
+  var testApi, app, sandbox, token;
 
   before(function () {
 
-    appServer = TestServer.app('/users', api);
-    app = appServer.app;
+    testApi = Test.Api('/users', api);
+    app = testApi.app;
 
   });
 
   after(function () {
-    appServer.close();
+    testApi.close();
   });
 
   beforeEach(function (done) {
-    
+
     sandbox = sinon.sandbox.create();
-    
-    q.all([
-      User.remove({}),
-      User.create([{
-        _id: 'd0ffff000000000000000000',
-        name: 'Homer Simpson',
-        email: 'homer@simpsons.com',
-        credentials: {
-          password: {
-            hash: '$2a$04$4rSJiwVc8spPeU3gYyk56e621PsoZL/J3Msmc0xzhBpGwsoZDblvS'
-          }
-        }
-      }]),
-    ])
-    .then(function () {
 
-      security.issueToken('homer@simpsons.com', '1234', 86400000, appServer.logger)
-      .then(function (data) {
-
-        token = 'Bearer ' + data.token;
-        done();
-
-      }, done);
-    });
+    Test.mongoLoader(User, userData)
+    .then(Test.issueToken('homer@simpsons.com', '1234'))
+    .then(function (issuedToken) {
+      token = issuedToken;
+    })
+    .then(done)
+    .catch(done);
 
   });
 
@@ -71,7 +55,7 @@ describe('/users/api', function () {
         expect(res.body.token).to.be.defined;
         expect(res.body.timeout).to.at.least(Date.now() + 1000);
         expect(res.body.user.email).to.be.equals('homer@simpsons.com');
-        expect(res.body.user._id).to.be.equals('d0ffff000000000000000000');
+        expect(res.body.user._id).to.be.equals('aaaaaaaf0000000f00001111');
         expect(res.body.user.credentials).to.be.undefined;
 
       })
@@ -121,7 +105,7 @@ describe('/users/api', function () {
 
     it('Returns 500 when redis.get fails', function (done) {
 
-      sandbox.stub(appServer.redis, 'get').yields(new Error('redisError'));
+      sandbox.stub(testApi.redis, 'get').yields(new Error('redisError'));
 
       supertest(app)
       .post('/users/auth/password/')
