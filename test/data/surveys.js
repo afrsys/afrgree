@@ -14,8 +14,8 @@ module.exports = [{
     'dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, ' +
     'sunt in culpa qui officia deserunt mollit anim id est laborum.',
   ballot: [{
-      option: 'True',
-      votes: [
+    option: 'True',
+    votes: [
       { user: 'aaaaaaaf0000000f00001111' },
       { user: 'aaaaaaaf0000000f00003333' },
       { user: 'aaaaaaaf0000000f00004444' }
